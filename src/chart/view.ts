@@ -7,6 +7,7 @@ import {
   flatten,
   get,
   isBoolean,
+  isEmpty,
   isFunction,
   isNil,
   isObject,
@@ -1489,9 +1490,12 @@ export class View extends Base {
         coordinate: this.getCoordinate(), // 使用 coordinate 引用，可以保持 coordinate 的同步更新
         scaleDefs: get(this.options, 'scales', {}),
         data: this.filteredData,
-        theme: deepMix({}, this.themeObject, geometry.theme), // 支持 geometry 层级的主题设置
+        theme: isEmpty(geometry.theme) ?
+          this.themeObject :
+          deepMix({}, this.themeObject, geometry.theme), // 支持 geometry 层级的主题设置
         isDataChanged: this.isDataChanged,
       };
+
       if (isUpdate) {
         // 数据发生更新
         geometry.update(cfg);
