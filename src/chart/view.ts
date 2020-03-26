@@ -52,6 +52,7 @@ import Base from '../base';
 import { Facet, getFacet } from '../facet';
 import Geometry from '../geometry/base';
 import { createInteraction, Interaction } from '../interaction';
+import { getTheme } from '../theme';
 import { BBox } from '../util/bbox';
 import { getCoordinateClipCfg, isFullCircle, isPointInCoordinate } from '../util/coordinate';
 import { mergeTheme } from '../util/theme';
@@ -162,10 +163,16 @@ export class View extends Base {
     this.foregroundGroup = foregroundGroup;
     this.region = region;
     this.padding = padding;
-    this.themeObject = mergeTheme({}, theme);
     // 接受父 view 传入的参数
     this.options = { ...this.options, ...options };
     this.limitInPlot = limitInPlot;
+
+    // 初始化主题
+    if (theme) {
+      this.themeObject = mergeTheme(getTheme('default'), theme);
+    } else {
+      this.themeObject = getTheme('default');
+    }
 
     this.init();
   }
