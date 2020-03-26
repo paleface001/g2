@@ -83,15 +83,17 @@ describe('State setting', () => {
       theme: Theme,
     });
 
-    interval.position('a*b').state({
-      selected: {
-        style: {
-          stroke: '#000',
-          lineWidth: 2,
+    interval
+      .position('a*b')
+      .state({
+        selected: {
+          style: {
+            stroke: '#000',
+            lineWidth: 2,
+          },
         },
-        animate: null,
-      },
-    });
+      })
+      .animate(false);
 
     interval.init();
     interval.paint();

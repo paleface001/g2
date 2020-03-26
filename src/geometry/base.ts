@@ -2,6 +2,7 @@ import { Adjust, getAdjust as getAdjustClass } from '@antv/adjust';
 import { Attribute, getAttribute as getAttributeClass } from '@antv/attr';
 import {
   clone,
+  deepMix,
   each,
   flatten,
   get,
@@ -19,7 +20,6 @@ import {
 } from '@antv/util';
 import { doGroupAppearAnimate } from '../animate';
 import Base from '../base';
-import Labels from '../component/labels';
 import { FIELD_ORIGIN, GROUP_ATTRS } from '../constant';
 import { BBox, Coordinate, IGroup, IShape, Scale } from '../dependents';
 import {
@@ -50,11 +50,11 @@ import {
 } from '../interface';
 import Element from './element';
 import { getGeometryLabel } from './label';
+import GeometryLabel from './label/base';
 import { getShapeFactory } from './shape/base';
 import { group } from './util/group-data';
 import { isModelChange } from './util/is-model-change';
 import { parseFields } from './util/parse-fields';
-import GeometryLabel from './label/base';
 
 /** @ignore */
 interface AttributeInstanceCfg {
@@ -176,10 +176,10 @@ export default class Geometry extends Base {
   public labelOption: LabelOption | false;
   /** 状态量相关的配置项 */
   public stateOption: StateOption;
-  /** animate 配置项 */
-  public animateOption: AnimateOption | boolean = true;
   /** 使用 key-value 结构存储 Element，key 为每个 Element 实例对应的唯一 ID */
   public elementsMap: Record<string, Element> = {};
+  /** animate 配置项 */
+  public animateOption: AnimateOption | boolean = true;
   /** 图形属性映射配置 */
   protected attributeOption: Record<string, AttributeOption> = {};
   /** adjust 配置项 */
@@ -812,6 +812,10 @@ export default class Geometry extends Base {
    * 将原始数据映射至图形空间，同时创建图形对象。
    */
   public paint(isUpdate: boolean = false) {
+    if (this.animateOption) {
+      this.animateOption = deepMix({}, getDefaultAnimateCfg(this.type, this.coordinate), this.animateOption)
+    }
+
     this.defaultSize = undefined;
     this.elements = [];
     this.elementsMap = {};
@@ -1257,6 +1261,7 @@ export default class Geometry extends Base {
       container,
       offscreenGroup: this.getOffscreenGroup(),
     });
+    element.animate = this.animateOption;
     element.geometry = this;
     element.draw(shapeCfg, isUpdate); // 绘制
 
@@ -1317,6 +1322,7 @@ export default class Geometry extends Base {
         const currentShapeCfg = this.getDrawCfg(mappingDatum);
         const preShapeCfg = result.getModel();
         if (isModelChange(currentShapeCfg, preShapeCfg)) {
+          result.animate = this.animateOption;
           // 通过绘制数据的变更来判断是否需要更新，因为用户有可能会修改图形属性映射
           result.update(currentShapeCfg); // 更新对应的 element
         }

@@ -279,9 +279,6 @@ export function getThemeByStylesheet(styleSheet: StyleSheet) {
             style: shapeStyles.interval.inactive,
           },
           selected: {
-            animateCfg: {
-              duration: 300,
-            },
             style: (element: Element) => {
               const coordinate = element.geometry.coordinate;
               if (coordinate.isPolar && coordinate.isTransposed) {
