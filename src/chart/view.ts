@@ -17,7 +17,6 @@ import {
   remove,
   set,
   size,
-  uniq,
   uniqueId,
 } from '@antv/util';
 import { Attribute, Coordinate, Event as GEvent, GroupComponent, ICanvas, IGroup, IShape, Scale } from '../dependents';
@@ -55,6 +54,7 @@ import { createInteraction, Interaction } from '../interaction';
 import { getTheme } from '../theme';
 import { BBox } from '../util/bbox';
 import { getCoordinateClipCfg, isFullCircle, isPointInCoordinate } from '../util/coordinate';
+import { uniq } from '../util/helper';
 import { mergeTheme } from '../util/theme';
 import { findDataByPoint } from '../util/tooltip';
 import Chart from './chart';
@@ -883,7 +883,15 @@ export class View extends Base {
    */
   public getYScales(): Scale[] {
     // 拿到所有的 Geometry 的 Y scale，然后去重
-    return uniq(this.geometries.map((g: Geometry) => g.getYScale()));
+    const tmpMap = {};
+    return this.geometries.map((g: Geometry) => {
+      const yScale = g.getYScale();
+      const field = yScale.field;
+      if (!tmpMap[field]) {
+        tmpMap[field] = true;
+        return yScale;
+      }
+    });
   }
 
   /**
@@ -1568,21 +1576,23 @@ export class View extends Base {
   }
 
   private getScaleFields() {
-    const fields = this.geometries.reduce((r: string[], geometry: Geometry): string[] => {
-      r = r.concat(geometry.getScaleFields())
-      return r;
-    }, []);
-
-    return uniq(fields);
+    const fields = [];
+    const tmpMap = {};
+    for (const geometry of this.geometries) {
+      const geometryScales = geometry.getScaleFields();
+      uniq(geometryScales, fields, tmpMap);
+    }
+    return fields;
   }
 
   private getGroupedFields() {
-    const fields = this.geometries.reduce((r: string[], geometry: Geometry): string[] => {
-      r = r.concat(geometry.getGroupFields());
-      return r;
-    }, []);
-
-    return uniq(fields);
+    const fields = [];
+    const tmpMap = {};
+    for (const geometry of this.geometries) {
+      const geometryScales = geometry.getGroupFields();
+      uniq(geometryScales, fields, tmpMap);
+    }
+    return fields;
   }
 
   /**
