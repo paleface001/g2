@@ -250,7 +250,7 @@ export default class Geometry extends Base {
    * @param cfg 映射规则
    * @returns
    */
-  public position(cfg: string | string [] | AttributeOption): Geometry {
+  public position(cfg: string | string[] | AttributeOption): Geometry {
     let positionCfg = cfg;
     if (!isPlainObject(cfg)) {
       // 字符串字段或者数组字段
@@ -990,18 +990,16 @@ export default class Geometry extends Base {
    * @returns
    */
   public getAttributeValues(attr: Attribute, obj: Datum) {
-    const scales = attr.scales;
-
-    const params = scales.map((scale: Scale) => {
+    const params = [];
+    for (const scale of attr.scales) {
       const field = scale.field;
-      if (scale.type === 'identity') {
-        return scale.values[0];
+      if (scale.isIdentity) {
+        params.push(scale.values);
+      } else {
+        params.push(obj[field]);
       }
-      if (scale.isCategory) {
-        return obj[field]; // 数据有可能发生过 adjust
-      }
-      return obj[field];
-    });
+    }
+
     return attr.mapping(...params);
   }
 
@@ -1082,13 +1080,11 @@ export default class Geometry extends Base {
     }
 
     const groupScales = this.getGroupScales();
-    if (!isEmpty(groupScales)) {
-      each(groupScales, (groupScale: Scale) => {
-        const field = groupScale.field;
-        if (groupScale.type !== 'identity') {
-          id = `${id}-${originData[field]}`;
-        }
-      });
+    for (const groupScale of groupScales) {
+      const field = groupScale.field;
+      if (groupScale.type !== 'identity') {
+        id = `${id}-${originData[field]}`;
+      }
     }
 
     // 用户在进行 dodge 类型的 adjust 调整的时候设置了 dodgeBy 属性
@@ -1145,9 +1141,9 @@ export default class Geometry extends Base {
    */
   public changeVisible(visible: boolean) {
     super.changeVisible(visible);
-    this.elements.forEach((element: Element) => {
+    for (const element of this.elements) {
       element.changeVisible(visible);
-    });
+    }
     if (visible) {
       if (this.container) {
         this.container.show();
@@ -1514,7 +1510,7 @@ export default class Geometry extends Base {
       const yScale = this.getYScale();
       const xField = xScale.field;
       const yField = yScale ? yScale.field : null;
-      adjustOption.forEach((adjust: AdjustOption) => {
+      for (const adjust of adjustOption) {
         const adjustCfg: AdjustInstanceCfg = {
           xField,
           yField,
@@ -1552,7 +1548,7 @@ export default class Geometry extends Base {
         result = adjustInstance.process(result);
 
         this.adjusts[type] = adjustInstance;
-      });
+      }
     }
 
     return result;
@@ -1614,19 +1610,17 @@ export default class Geometry extends Base {
     if (this.sortable) {
       const xScale = this.getXScale();
       const field = xScale.field;
-      each(source, (data) => {
+      for (const data of source) {
         data.sort((v1: Datum, v2: Datum) => {
           return xScale.translate(v1[field]) - xScale.translate(v2[field]);
         });
-      });
+      }
     }
     if (this.generatePoints) {
       // 需要生成关键点
-      each(source, (data) => {
-        this.generateShapePoints(data);
-      });
-
       source.reduce((preData: Data, currentData: Data) => {
+        this.generateShapePoints(preData);
+        this.generateShapePoints(currentData);
         preData[0].nextPoints = currentData[0].points;
         return currentData;
       }, source[0]);
@@ -1727,7 +1721,7 @@ export default class Geometry extends Base {
       }
     } else if (isArray(y)) {
       rstY = [];
-      y.forEach((yVal) => {
+      for (const yVal of y) {
         obj = coordinate.convert({
           x: x as number,
           y: yVal,
@@ -1741,10 +1735,10 @@ export default class Geometry extends Base {
           rstX = obj.x;
         }
         rstY.push(obj.y);
-      });
+      }
     } else if (isArray(x)) {
       rstX = [];
-      x.forEach((xVal) => {
+      for (const xVal of x) {
         obj = coordinate.convert({
           x: xVal,
           y: y as number,
@@ -1758,7 +1752,7 @@ export default class Geometry extends Base {
           rstY = obj.y;
         }
         rstX.push(obj.x);
-      });
+      }
     } else {
       const point = coordinate.convert({
         x,
@@ -1775,11 +1769,11 @@ export default class Geometry extends Base {
   private sort(mappingArray: Data[]) {
     const xScale = this.getXScale();
     const xField = xScale.field;
-    each(mappingArray, (itemArr: Data) => {
+    for (const itemArr of mappingArray) {
       itemArr.sort((obj1: Datum, obj2: Datum) => {
         return xScale.translate(obj1[FIELD_ORIGIN][xField]) - xScale.translate(obj2[FIELD_ORIGIN][xField]);
       });
-    });
+    };
   }
 
   // 获取 style 配置
@@ -1835,14 +1829,13 @@ export default class Geometry extends Base {
     const labelsMap = geometryLabel.labelsRenderer.shapesMap;
     each(this.elementsMap, (element: Element, id) => {
       const labels = filterLabelsById(id, labelsMap); // element 实例同 label 进行绑定
-      element.labelShape = labels;
       if (labels.length) {
-        each(labels, label => {
-          const children = label.getChildren();
-          each(children, child => {
+        element.labelShape = labels;
+        for (const label of labels) {
+          for (const child of label.getChildren()) {
             child.set('element', element);
-          });
-        });
+          }
+        }
       }
     });
   }
