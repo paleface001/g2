@@ -330,7 +330,7 @@ export default class Element extends Base {
     const defaultState = theme[shapeType] || theme[shapeFactory.defaultShapeType];
 
     let stateCfg;
-    const stateOption = get(this.geometry.stateOption, stateName, {});
+    const stateOption = get(this.geometry.stateOption, stateName);
     if (stateOption) {
       // 用户通过 geometry.state() 接口定义了状态样式
       stateCfg = deepMix({}, get(defaultState, [stateName], {}), stateOption);
