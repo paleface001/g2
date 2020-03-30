@@ -328,16 +328,8 @@ export default class Element extends Base {
   private getStateStyle(stateName: string, shapeKey?: string): StateCfg {
     const { theme, shapeFactory, shapeType } = this;
     const defaultState = theme[shapeType] || theme[shapeFactory.defaultShapeType];
-
-    let stateCfg;
     const stateOption = get(this.geometry.stateOption, stateName);
-    if (stateOption) {
-      // 用户通过 geometry.state() 接口定义了状态样式
-      stateCfg = deepMix({}, get(defaultState, [stateName], {}), stateOption);
-    } else {
-      stateCfg = get(defaultState, [stateName], {});
-    }
-
+    const stateCfg = deepMix({}, get(defaultState, [stateName], {}), stateOption);
     let shapeStyle = get(stateCfg.style, [shapeKey], stateCfg.style);
 
     if (isFunction(shapeStyle)) {
