@@ -1271,7 +1271,6 @@ export default class Geometry extends Base {
     const shapeFactory = this.getShapeFactory();
 
     const element = new Element({
-      theme: get(theme, ['geometries', this.shapeType], {}),
       shapeFactory,
       container,
       offscreenGroup: this.getOffscreenGroup(),
