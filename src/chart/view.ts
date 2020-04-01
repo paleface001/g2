@@ -13,12 +13,12 @@ import {
   isString,
   isUndefined,
   map,
+  mix,
   remove,
   set,
   size,
   uniq,
   uniqueId,
-  mix,
 } from '@antv/util';
 import { Attribute, Coordinate, Event as GEvent, GroupComponent, ICanvas, IGroup, IShape, Scale } from '../dependents';
 import {

@@ -1,6 +1,4 @@
-import { CONTAINER_CLASS } from '@antv/component/lib/tooltip/css-const';
-
-import { deepMix, each, find, flatten, get, isArray, isEqual, isFunction, mix, isUndefined } from '@antv/util';
+import { deepMix, each, find, flatten, get, isArray, isEqual, isFunction, isUndefined, mix } from '@antv/util';
 import { Crosshair, HtmlTooltip, IGroup } from '../../dependents';
 import Geometry from '../../geometry/base';
 import { MappingDatum, Point, TooltipOption } from '../../interface';
